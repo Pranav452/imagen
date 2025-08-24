@@ -2,6 +2,16 @@ import { GoogleGenAI, Modality } from "@google/genai";
 import { NextRequest, NextResponse } from "next/server";
 import { WebClient } from "@slack/web-api";
 
+// Define the Slack file upload response type
+interface SlackFileUploadResponse {
+  file?: {
+    id: string;
+    url_private?: string;
+    name?: string;
+    title?: string;
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Get the prompt from the request body
@@ -84,13 +94,15 @@ export async function POST(request: NextRequest) {
           initial_comment: `🎨 Generated image for prompt: "${prompt}"`,
         });
 
+        const typedUploadResult = uploadResult as SlackFileUploadResponse;
+
         slackUploadResult = {
           success: true,
-          fileId: (uploadResult as any).file?.id,
-          fileUrl: (uploadResult as any).file?.url_private,
+          fileId: typedUploadResult.file?.id,
+          fileUrl: typedUploadResult.file?.url_private,
         };
 
-        console.log('Image uploaded to Slack successfully:', (uploadResult as any).file?.id);
+        console.log('Image uploaded to Slack successfully:', typedUploadResult.file?.id);
       } catch (slackError) {
         console.error('Error uploading to Slack:', slackError);
         slackUploadResult = {
