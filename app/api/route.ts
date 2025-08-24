@@ -90,8 +90,6 @@ export async function POST(request: NextRequest) {
           channel_id: slackChannelId,
           file: imageBuffer,
           filename: `generated-image-${Date.now()}.png`,
-          title: `Generated Image: ${prompt}`,
-          initial_comment: `🎨 Generated image for prompt: "${prompt}"`,
         });
 
         const typedUploadResult = uploadResult as SlackFileUploadResponse;
