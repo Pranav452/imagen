@@ -1,5 +1,6 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import { NextRequest, NextResponse } from "next/server";
+import { WebClient } from "@slack/web-api";
 
 export async function POST(request: NextRequest) {
   try {
@@ -62,10 +63,50 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return the base64 image data
+    // Initialize Slack client
+    const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
+    const slackChannelId = process.env.SLACK_CHANNEL_ID;
+
+    let slackUploadResult = null;
+
+    // Send image to Slack if credentials are available
+    if (process.env.SLACK_BOT_TOKEN && slackChannelId && slackChannelId !== 'C1234567890') {
+      try {
+        // Convert base64 to buffer for Slack upload
+        const imageBuffer = Buffer.from(imageData, 'base64');
+
+        // Upload image to Slack
+        const uploadResult = await slack.files.uploadV2({
+          channel_id: slackChannelId,
+          file: imageBuffer,
+          filename: `generated-image-${Date.now()}.png`,
+          title: `Generated Image: ${prompt}`,
+          initial_comment: `🎨 Generated image for prompt: "${prompt}"`,
+        });
+
+        slackUploadResult = {
+          success: true,
+          fileId: (uploadResult as any).file?.id,
+          fileUrl: (uploadResult as any).file?.url_private,
+        };
+
+        console.log('Image uploaded to Slack successfully:', (uploadResult as any).file?.id);
+      } catch (slackError) {
+        console.error('Error uploading to Slack:', slackError);
+        slackUploadResult = {
+          success: false,
+          error: slackError instanceof Error ? slackError.message : 'Failed to upload to Slack',
+        };
+      }
+    } else {
+      console.log('Slack credentials not configured, skipping Slack upload');
+    }
+
+    // Return the base64 image data along with Slack upload status
     return NextResponse.json({
       success: true,
       image: `data:image/png;base64,${imageData}`, // This is already base64 encoded
+      slackUpload: slackUploadResult,
     });
 
   } catch (error) {
