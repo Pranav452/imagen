@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     // Return the base64 image data
     return NextResponse.json({
       success: true,
-      image: imageData, // This is already base64 encoded
+      image: `data:image/png;base64,${imageData}`, // This is already base64 encoded
     });
 
   } catch (error) {
