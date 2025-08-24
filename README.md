@@ -1,22 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a [Next.js](https://nextjs.org) project with Google Gemini AI image generation API.
 
-## Getting Started
+## Features
 
-First, run the development server:
+- **AI Image Generation**: Generate images using Google's Gemini 2.0 Flash model
+- **REST API**: Simple POST endpoint for image generation
+- **Base64 Response**: Returns generated images as base64 encoded data
 
+## Setup
+
+1. **Install dependencies**:
+```bash
+npm install
+```
+
+2. **Set up environment variables**:
+   - Copy `.env.example` to `.env.local`
+   - Get your Google Generative AI API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+   - Add your API key to `.env.local`:
+   ```
+   GOOGLE_GENERATIVE_AI_API_KEY=your_api_key_here
+   ```
+
+3. **Run the development server**:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## API Usage
+
+### Generate Image
+
+**Endpoint**: `POST /api`
+
+**Request Body**:
+```json
+{
+  "prompt": "A 3D rendered image of a pig with wings and a top hat flying over a futuristic sci-fi city with lots of greenery"
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "image": "base64_encoded_image_data"
+}
+```
+
+**Example Usage**:
+```bash
+curl -X POST http://localhost:3000/api \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "A beautiful sunset over mountains"}'
+```
+
+**JavaScript Example**:
+```javascript
+const response = await fetch('/api', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    prompt: 'A 3D rendered image of a pig with wings and a top hat flying over a futuristic sci-fi city with lots of greenery'
+  }),
+});
+
+const data = await response.json();
+if (data.success) {
+  // data.image contains the base64 encoded image
+  console.log('Generated image:', data.image);
+}
+```
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
